@@ -46,16 +46,20 @@ play_database = [
 # -------------------------
 
 st.title("AI Offensive Coordinator")
-st.markdown("Get your best play call based on down, distance, and coverage look.")
+st.markdown("Get your best play call based on down, distance, and up to 2 coverage looks.")
 
 down = st.selectbox("Down", ["1st", "2nd", "3rd", "4th"])
 distance = st.selectbox("Distance", ["Short (1-3 yds)", "Medium (4-7 yds)", "Long (8+ yds)"])
-coverage = st.selectbox("Pre-Snap Defensive Look", ["Cover 0", "Cover 1", "Cover 2", "Cover 3", "Cover 4", "Cover 6", "Palms", "Tampa 2", "Match"])
+coverages = st.multiselect(
+    "Pre-Snap Defensive Look (choose 1 or 2)",
+    ["Cover 0", "Cover 1", "Cover 2", "Cover 3", "Cover 4", "Cover 6", "Palms", "Tampa 2", "Match"],
+    max_selections=2
+)
 
 if st.button("Get Play Suggestion"):
     found_play = None
     for play in play_database:
-        if coverage in play["vs_coverages"] and (
+        if any(c in play["vs_coverages"] for c in coverages) and (
             play["down_distance"] == "Any" or (down == "3rd" and "Long" in distance and play["down_distance"] == "3rd & Long")
         ):
             found_play = play
