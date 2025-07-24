@@ -92,7 +92,7 @@ play_database = [
         "formation": "Gun Bunch Open Offset",
         "play_name": "Y Trail #1",
         "vs_coverages": ["Cover 1", "Cover 3", "Man"],
-        "down_distance": "3rd & Medium",
+        "down_distance": "Medium",
         "alignment": "Bunch right",
         "hot_routes": {
             "X": "Dig",
@@ -126,7 +126,7 @@ play_database = [
         "formation": "Gun Bunch Open Offset",
         "play_name": "Mesh Spot #1",
         "vs_coverages": ["Cover 2", "Cover 3", "Man"],
-        "down_distance": "3rd & Short",
+        "down_distance": "Short",
         "alignment": "Bunch right",
         "hot_routes": {
             "X": "Drag",
@@ -196,7 +196,7 @@ play_database = [
         "formation": "Gun Tight Open",
         "play_name": "Dig Z Spot",
         "vs_coverages": ["Cover 3", "Man"],
-        "down_distance": "3rd & Medium",
+        "down_distance": "Medium",
         "alignment": "Tight splits",
         "hot_routes": {
             "X": "Dig",
@@ -266,7 +266,7 @@ play_database = [
         "formation": "Pistol Wing Flex Close",
         "play_name": "Speed Option",
         "vs_coverages": ["All"],
-        "down_distance": "Short yardage",
+        "down_distance": "Short",
         "alignment": "Wing flex close",
         "hot_routes": {
             "X": "Block",
@@ -283,7 +283,7 @@ play_database = [
         "formation": "Gun Normal Flex Snug",
         "play_name": "RPO Alert WR Screens",
         "vs_coverages": ["Blitz", "Cover 0", "Man"],
-        "down_distance": "Short yardage",
+        "down_distance": "Short",
         "alignment": "Flex snug",
         "hot_routes": {
             "X": "Screen",
@@ -300,7 +300,7 @@ play_database = [
         "formation": "Gun Trips HB Wk",
         "play_name": "HB Angle Screen",
         "vs_coverages": ["Blitz", "Cover 1", "Cover 0"],
-        "down_distance": "Short yardage",
+        "down_distance": "Short",
         "alignment": "Trips left, HB weak",
         "hot_routes": {
             "X": "Block",
@@ -315,9 +315,8 @@ play_database = [
     },
 ]
 
-# -------------------- SMART PLAY TYPE TAGGING --------------------
+# ------------- SMART PLAY TYPE TAGGING -------------
 def infer_play_type(play):
-    """Infer play type for smarter recommendation"""
     name = play["play_name"].lower()
     if "zone" in name or "option" in name or "inside zone" in name:
         return "run"
@@ -326,16 +325,15 @@ def infer_play_type(play):
     if "screen" in name:
         return "screen"
     return "pass"
-
 for play in play_database:
     play["play_type"] = infer_play_type(play)
 
-# -------------------- STREAMLIT APP UI/LOGIC --------------------
+# ------------- STREAMLIT APP UI/LOGIC (distance fixed) -------------
 st.title("AI Offensive Coordinator - Alabama PDF Edition (Smart)")
 st.markdown("Select down, distance, and coverage to get your best play for the situation!")
 
 down = st.selectbox("Down", ["1st", "2nd", "3rd", "4th"])
-distance = st.selectbox("Distance", ["Short yardage", "Any", "3rd & Medium", "3rd & Short", "3rd & Long"])
+distance = st.selectbox("Distance", ["Short", "Medium", "Long", "Any"])
 coverages = st.multiselect(
     "Pre-Snap Defensive Look (pick 1 or 2)",
     ["Cover 0", "Cover 1", "Cover 2", "Cover 3", "Cover 4", "Match", "Blitz", "Man", "All"],
@@ -344,9 +342,9 @@ coverages = st.multiselect(
 
 def get_priority(play):
     play_type = play.get("play_type", "pass")
-    if "Short" in distance:
+    if distance == "Short":
         return {"run": 0, "rpo": 1, "screen": 2, "pass": 3}[play_type]
-    elif "Long" in distance:
+    elif distance == "Long":
         return {"pass": 0, "screen": 1, "rpo": 2, "run": 3}[play_type]
     else:
         return {"pass": 0, "rpo": 1, "screen": 2, "run": 3}[play_type]
